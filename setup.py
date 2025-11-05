@@ -3,7 +3,7 @@ from setuptools.command.test import test as TestCommand
 import sys
 import six
 
-NAME = 'smartsheet-python-sdk'
+NAME = 'smartsheet_python_sdk'
 
 REQUIRES = [
     'requests',
@@ -65,7 +65,7 @@ setup(
     },
     setup_requires=['setuptools_scm==7.0.1'],
     install_requires=REQUIRES,
-    packages=find_packages(),
+    packages=find_packages(include=['smartsheet', 'smartsheet.*']),
     include_package_data=True,
     long_description=open('README.md').read(),
     long_description_content_type='text/markdown',

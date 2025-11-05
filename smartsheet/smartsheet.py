@@ -185,6 +185,8 @@ class Smartsheet:
         self._api_base = api_base
         self._assume_user = None
         self._test_scenario_name = None
+        self._wiremock_test_name = None
+        self._wiremock_request_id = None
         self._change_agent = None
 
     def assume_user(self, email=None):
@@ -226,6 +228,18 @@ class Smartsheet:
             name (str): The name of the test scenario.
         """
         self._test_scenario_name = name
+
+    def with_wiremock_test_case(self, test_name: str, request_id: str):
+        """
+        Configure client with x-test-name and x-request-id headers.
+        Used for wiremock test cases.
+
+        Args:
+            test_name (str): The name of the wiremock test case.
+            request_id (str): The unique request ID for this test scenario.
+        """
+        self._wiremock_test_name = test_name
+        self._wiremock_request_id = request_id
 
     def with_change_agent(self, change_agent):
         """
@@ -437,6 +451,9 @@ class Smartsheet:
                 del prepped_request.headers["Api-Scenario"]
             except KeyError:
                 pass
+        if self._wiremock_test_name is not None and self._wiremock_request_id is not None:
+            prepped_request.headers["X-Test-Name"] = self._wiremock_test_name
+            prepped_request.headers["X-Request-ID"] = self._wiremock_request_id
 
         if self._change_agent is not None:
             prepped_request.headers.update(
@@ -629,8 +646,13 @@ class OperationErrorResult:
             expected (list): Dashed expectations
         """
         # look up name of the error
-        error_payload = self.resp.json()
-        error_code = error_payload["errorCode"]
+        error_payload = {}
+        try:
+            error_payload = self.resp.json()
+        except json.JSONDecodeError:
+            # Do not fail if the response is not JSON
+            pass
+        error_code = error_payload.get("errorCode", 0)
         try:
             error_name = OperationErrorResult.error_lookup[error_code]["name"]
             recommendation = OperationErrorResult.error_lookup[error_code][
@@ -638,6 +660,7 @@ class OperationErrorResult:
             ]
             should_retry = OperationErrorResult.error_lookup[error_code]["should_retry"]
         except:
+            # If error_code is present in the response but not in the lookup, default to ApiError
             error_name = OperationErrorResult.error_lookup[0]["name"]
             recommendation = OperationErrorResult.error_lookup[0]["recommendation"]
             should_retry = OperationErrorResult.error_lookup[0]["should_retry"]
@@ -649,8 +672,8 @@ class OperationErrorResult:
                         "name": error_name,
                         "status_code": self.resp.status_code,
                         "code": error_code,
-                        "message": error_payload["message"],
-                        "ref_id": error_payload["refId"],
+                        "message": error_payload.get("message"),
+                        "ref_id": error_payload.get("refId"),
                         "recommendation": recommendation,
                         "should_retry": should_retry,
                     }

@@ -5,6 +5,55 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [3.5.4] - 2025-10-31
+
+### Fixed
+
+- [Issue-92](https://github.com/smartsheet/smartsheet-python-sdk/issues/92): Only include the `smartsheet` package in the build.
+
+## [3.5.3] - 2025-10-31
+
+### Fixed
+
+- The new sharing endpoints (/2.0/shares) return string for userId and groupId, adjust the SDK to that.
+
+### Added
+
+- `AssetShare` model to fully comply with the new sharing endpoints (/2.0/shares) DTO.
+
+## [3.5.2] - 2025-10-29
+
+### Fixed
+
+- Fix list_asset_shares to return AssetSharesPaginatedResult.
+- Fix update_asset_share to return Share
+
+## Added
+
+- Add AssetSharesPaginatedResult for list asset shares.
+- Add mock api tests for sharing endpoints.
+
+## [3.5.1] - 2025-10-28
+
+### Fixed
+
+- Rename asset_shares.py to sharing.py so that Smartsheet.__getattr__ can pick it up.
+
+## [3.5.0] - 2025-10-24
+
+### Added
+
+- Add robust error handling. The SDK won't throw an exception if the error response body is not JSON or properties are missing.
+- Add provisionalExpirationDate field to the user_model and user_plan models
+
+## [3.4.0] - 2025-10-20
+
+### Fixed
+
+- Fix minor lint issue
+- Use pytest directly to run tests
+- Fix @deprecated decorator use.
+
 ## [3.3.0] - 2025-10-07
 
 ### Added
